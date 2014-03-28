@@ -1,0 +1,11 @@
+gfcanalysis 1.1
+===============
+
+*  Move "snow" from Suggests to Enhances
+
+*  Update inst/examples/analyze_GFC.R to test or "snow"
+
+gfcanalysis 1.0
+===============
+
+*  Initial release to CRAN.

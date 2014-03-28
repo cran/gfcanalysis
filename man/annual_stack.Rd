@@ -1,0 +1,30 @@
+\name{annual_stack}
+\alias{annual_stack}
+\title{Generate an annual stack of forest change from GFC product}
+\usage{
+annual_stack(gfc)
+}
+\arguments{
+  \item{gfc}{thresholded extract of GFC product for a given
+  AOI (see \code{\link{threshold_gfc}})}
+}
+\description{
+Uses thresholded GFC data as output by
+\code{\link{threshold_gfc}} to make an annualized layer
+stack of forest change. See Details for the class codes
+used in the annual raster stack. The
+\code{\link{animate_annual}} function can be used to
+produce an animation of forest change from the generated
+layer stack.
+}
+\details{
+The output raster stack uses the following codes to
+describe forest change at each pixel: \tabular{lc}{ Nodata
+\tab 0 \cr Forest \tab 1 \cr Non-forest \tab 2 \cr Forest
+loss \tab 3 \cr Forest gain \tab 4 \cr Forest loss and gain
+\tab 5 \cr Water \tab 6 \cr }
+}
+\seealso{
+\code{\link{threshold_gfc}}, \code{\link{animate_annual}}
+}
+

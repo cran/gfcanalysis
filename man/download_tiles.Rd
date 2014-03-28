@@ -1,0 +1,37 @@
+\name{download_tiles}
+\alias{download_tiles}
+\title{Download a set of GFC tiles}
+\usage{
+download_tiles(tiles, output_folder, first_and_last = TRUE)
+}
+\arguments{
+  \item{tiles}{\code{SpatialPolygonsDataFrame} with GFC
+  product tiles to download, as calculated by the
+  \code{calc_gfc_tiles} function.}
+
+  \item{output_folder}{the folder to save output data in}
+
+  \item{first_and_last}{whether to download the composite
+  images for 2000 and 2012 (which are substantially larger
+  than the other layers).}
+}
+\description{
+This function first checks whether each tile in a set GFC
+product tiles is present locally, and that local file sizes
+match the file sizes of the files available on the Google
+server hosting the GFC product. Next, the function
+downloads all tiles that either are not present locally, or
+that are present but have file sizes differing from the
+file on the Google server.
+}
+\examples{
+\dontrun{
+output_folder <- 'H:/Data/TEAM/GFC_Product'
+tiles <- calc_gfc_tiles(test_poly)
+download_tiles(tiles, output_folder)
+}
+}
+\seealso{
+\code{\link{extract_gfc}}
+}
+
