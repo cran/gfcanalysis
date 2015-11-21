@@ -1,3 +1,18 @@
+verify_layer_count <- function(gfc_stack, data_year) {
+    if (data_year == 2013 & nlayers(gfc_stack) != 13) {
+        warning('gfc_stack has ', nlayers(gfc_stack),
+                ' layers - full annual GFC product stack from 2013 Hansen dataset should have 13 layers')
+    } else if (data_year == 2014 & nlayers(gfc_stack) != 14) {
+        warning('gfc_stack has ', nlayers(gfc_stack),
+                ' layers - full annual GFC product stack from 2014 Hansen dataset should have 14 layers')
+    } else if (data_year == 2015 & nlayers(gfc_stack) != 15) {
+        warning('gfc_stack has ', nlayers(gfc_stack),
+                ' layers - full annual GFC product stack from 2015 Hansen dataset should have 15 layers')
+    } else if (data_year > 2015) {
+        warning('data_year ', data_year, ' is not officially supported')
+    }
+}
+
 #' Plot forest change (relative to 2000) for a given year
 #'
 #' Plots a single layer of forest change from a layer stack output by 
@@ -6,9 +21,10 @@
 #' @seealso \code{\link{annual_stack}}, \code{\link{animate_annual}}
 #' @export
 #' @import rgdal
-#' @import ggplot2
-#' @importFrom plyr join
 #' @importFrom grid unit
+#' @importFrom ggplot2 fortify geom_tile aes coord_fixed scale_fill_manual 
+#' theme_bw theme element_blank geom_path guides guide_legend ggtitle
+#' @importFrom plyr join
 #' @importFrom rasterVis gplot
 #' @importFrom sp spTransform CRS proj4string
 #' @param fchg a forest change raster layer (a single layer of the layer 
@@ -85,6 +101,7 @@ plot_gfc <- function(fchg, aoi, title_string='',
 #'
 #' @export
 #' @importFrom tools file_ext
+#' @importFrom utils file_test
 #' @import animation
 #' @param aoi one or more AOI polygons as a \code{SpatialPolygonsDataFrame} 
 #' object.  If there is a 'label' field  in the dataframe, it will be used to 
@@ -99,13 +116,14 @@ plot_gfc <- function(fchg, aoi, title_string='',
 #' @param height desired height of the animation GIF in inches
 #' @param width desired width of the animation GIF in inches
 #' @param dpi dots per inch for the output image
+#' @param data_year which version of the Hansen data was used when 
+#' \code{\link{annual_stack}} was run
 animate_annual <- function(aoi, gfc_stack, out_dir=getwd(), 
                            out_basename='gfc_animation', site_name='', 
-                           type='html', height=3, width=3, dpi=300) {
-    if (nlayers(gfc_stack) != 13) {
-        warning('gfc_stack has ', nlayers(gfc_stack),
-                ' layers - full annual GFC product stack should have 13 layers')
-    }
+                           type='html', height=3, width=3, dpi=300,
+                           data_year=2015) {
+    verify_layer_count(gfc_stack, data_year)
+
     if (!file_test('-d', out_dir)) {
         dir.create(out_dir)
     }
@@ -121,7 +139,7 @@ animate_annual <- function(aoi, gfc_stack, out_dir=getwd(),
         stop('type must be gif or html')
     }
 
-    dates <- seq(2000, 2012, 1)
+    dates <- gen_year_list(data_year)
 
     # Round maxpixels to nearest 1000
     maxpixels <- ceiling((width * height * dpi^2)/1000) * 1000

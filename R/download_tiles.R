@@ -13,6 +13,7 @@ verify_download <- function(tile_url, local_path) {
     }
 }
 
+#' @importFrom utils download.file
 download_tile <- function(tile_url, local_path) {
     ret_code <- download.file(tile_url, local_path, mode="wb")
     if (ret_code != 0) {
@@ -39,19 +40,26 @@ download_tile <- function(tile_url, local_path) {
 #' @export
 #' @importFrom sp bbox
 #' @importFrom stringr str_extract
+#' @importFrom utils file_test
 #' @param tiles \code{SpatialPolygonsDataFrame} with GFC 
 #' product tiles to download, as calculated by the \code{calc_gfc_tiles} 
 #' function.
 #' @param output_folder the folder to save output data in
-#' @param first_and_last whether to download the composite images for 2000 and 
-#' 2012 (which are substantially larger than the other layers).
+#' @param images which images to download. Can be any of 'treecover2000', 
+#' 'loss', 'gain', 'lossyear', 'datamask', 'first', and 'last'.
+#' @param data_year which version of the Hansen data to use
 #' @examples
 #' \dontrun{
 #' output_folder <- 'H:/Data/TEAM/GFC_Product'
 #' tiles <- calc_gfc_tiles(test_poly)
 #' download_tiles(tiles, output_folder)
 #' }
-download_tiles <- function(tiles, output_folder, first_and_last=TRUE) {
+download_tiles <- function(tiles, output_folder,
+                           images=c('treecover2000', 'loss', 'gain', 
+                                    'lossyear', 'datamask'),
+                           data_year=2015) {
+    stopifnot(all(images %in% c('treecover2000', 'loss', 'gain', 'lossyear', 
+                                'datamask', 'first', 'last')))
     if (!file_test('-d', output_folder)) {
         stop('output_folder does not exist')
     }
@@ -74,15 +82,11 @@ download_tiles <- function(tiles, output_folder, first_and_last=TRUE) {
         } else {
             max_y <- paste0(sprintf('%02i', max_y), 'N')
         }
-        file_root <- 'Hansen_GFC2013_'
+        file_root <- paste0('Hansen_GFC', data_year, '_')
         file_suffix <- paste0('_', max_y, '_', min_x, '.tif')
-        images <- c('treecover2000', 'loss', 'gain', 'lossyear', 'datamask')
-        if (first_and_last == TRUE) {
-            images <- c(images, 'first', 'last')
-        }
         filenames <- paste0(file_root, images, file_suffix)
-        tile_urls <- paste0('http://commondatastorage.googleapis.com/earthenginepartners-hansen/GFC2013/',
-                      filenames)
+
+        tile_urls <- paste0(paste0('http://commondatastorage.googleapis.com/earthenginepartners-hansen/GFC', data_year, '/'), filenames)
         local_paths <- file.path(output_folder, filenames)
 
         for (i in 1:length(filenames)) {
