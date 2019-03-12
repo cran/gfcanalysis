@@ -28,4 +28,3 @@ Plots a single layer of forest change from a layer stack output by
 \seealso{
 \code{\link{annual_stack}}, \code{\link{animate_annual}}
 }
-

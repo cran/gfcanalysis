@@ -34,4 +34,3 @@ gfc_tiles <- gen_grid(-180, 10, 180, -60, 10, 80)
 \seealso{
 \code{\link{download_tiles}}
 }
-
