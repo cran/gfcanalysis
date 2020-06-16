@@ -10,7 +10,7 @@ plot_gfc(fchg, aoi, title_string = "", size_scale = 1, maxpixels = 50000)
 \item{fchg}{a forest change raster layer (a single layer of the layer 
 stack output by \code{\link{annual_stack}}}
 
-\item{aoi}{one or more AOI polygons as a \code{SpatialPolygonsDataFrame} 
+\item{aoi}{one or more AOI polygons as a \code{SpatialPolygonsDataFrame} or \code{sf}
 object.  If there is a 'label' field  in the dataframe, it will be used to 
 label the polygons in the plots. If the AOI is not in WGS 1984 (EPSG:4326), 
 it will be reprojected to WGS84.}

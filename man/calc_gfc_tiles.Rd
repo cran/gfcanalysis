@@ -7,7 +7,7 @@
 calc_gfc_tiles(aoi)
 }
 \arguments{
-\item{aoi}{an Area of Interest (AOI) as a \code{SpatialPolygons*} object.
+\item{aoi}{an Area of Interest (AOI) as a \code{SpatialPolygons*} or \code{sf} object.
 If the AOI is not in the WGS84 geographic coordinate system, it will be 
 reprojected to WGS84.}
 }
@@ -16,7 +16,7 @@ a \code{SpatialPolygonsDataFrame} of the GFC tiles needed to cover
 the AOI
 }
 \description{
-Intersects an (optionally buffered) AOI with the GFC 
+Intersects an AOI with the GFC 
 product grid to determine what tiles are need to cover the AOI.
 }
 \examples{
