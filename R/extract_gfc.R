@@ -1,7 +1,7 @@
 #' @import methods
-#' @import rgdal
 #' @import raster
-#' @importFrom sp bbox spTransform CRS proj4string
+#' @import terra
+#' @importFrom sf st_bbox st_transform st_crs 
 make_tile_mosaic <- function(aoi, data_folder, dataset, filename="",
                              stack="change", ...) {
     if (stack == 'change') {
@@ -21,15 +21,16 @@ make_tile_mosaic <- function(aoi, data_folder, dataset, filename="",
     aoi <- check_aoi(aoi)
 
     tiles <- calc_gfc_tiles(aoi)
+
     # Transform aoi to match tiles CRS so it can be used later for cropping
-    aoi <- spTransform(aoi, CRS(proj4string(tiles)))
+    aoi <- st_transform(aoi, st_crs(tiles))
     file_root <- paste0('Hansen_', dataset, '_')
 
     tile_stacks <- c()
-    for (n in 1:length(tiles)) {
-        tile <- tiles[n]
-        min_x <- bbox(tile)[1, 1]
-        max_y <- bbox(tile)[2, 2]
+    for (n in 1:dim(tiles)[1]) {
+        tile <- tiles[n, ]
+        min_x <- st_bbox(tile)[1]
+        max_y <- st_bbox(tile)[4]
         if (min_x < 0) {
             min_x <- paste0(sprintf('%03i', abs(min_x)), 'W')
         } else {
@@ -70,14 +71,13 @@ make_tile_mosaic <- function(aoi, data_folder, dataset, filename="",
     } else {
         tile_mosaic <- tile_stacks[[1]]
         if (filename != '') {
-            tile_mosaic <- writeRaster(tile_mosaic, filename=filename, 
+            tile_mosaic <- terra::writeRaster(tile_mosaic, filename=filename, 
                                        datatype="INT1U", format="GTiff", 
                                        options="COMPRESS=LZW", ...)
         }
     }
     names(tile_mosaic) <- band_names
     NAvalue(tile_mosaic) <- -1
-
     return(tile_mosaic)
 }
 
@@ -129,10 +129,8 @@ scale_toar <- function(x, ...) {
 #' \code{\link{gfc_stats}}
 #'
 #' @export
-#' @import rgdal
-#' @importFrom sp spTransform CRS proj4string proj4string<-
-#' @importFrom rgeos gBuffer
-#' @param aoi an Area of Interest (AOI) as a \code{SpatialPolygons*} or \code{sf} object.  
+#' @importFrom sf st_transform st_crs st_buffer
+#' @param aoi an Area of Interest (AOI) as a \code{sf} object.  
 #' If the AOI is not in WGS 1984 (EPSG:4326), it will be reprojected to WGS84.
 #' @param data_folder folder where downloaded GFC product tiles are located 
 #' (see \code{\link{download_tiles}} function.
@@ -146,7 +144,7 @@ scale_toar <- function(x, ...) {
 #' \code{filename}, or \code{overwrite}.
 #' @return \code{RasterStack} with GFC layers
 extract_gfc <- function(aoi, data_folder, to_UTM=FALSE, stack="change", 
-                        dataset='GFC-2019-v1.7', ...) {
+                        dataset='GFC-2022-v1.10', ...) {
     if (stack == 'change') {
         band_names <- c('treecover2000', 'lossyear', 'gain', 
                         'datamask')
@@ -158,13 +156,14 @@ extract_gfc <- function(aoi, data_folder, to_UTM=FALSE, stack="change",
         stop('"stack" must be equal to "change", "first", or "last"')
     }
 
+    tile_mosaic <- make_tile_mosaic(aoi, data_folder, stack=stack, 
+                                    dataset=dataset, ...)
+
     if (to_UTM) {
-        tile_mosaic <- make_tile_mosaic(aoi, data_folder, stack=stack, 
-                                        dataset=dataset, ...)
         # Project to UTM for plotting and analysis of change in forest area.  
         # Calculate UTM zone based on bounding polygon of tile mosaic.
-        bounding_poly <- as(extent(tile_mosaic), "SpatialPolygons")
-        proj4string(bounding_poly) <- proj4string(tile_mosaic)
+        bounding_poly <- st_as_sfc(st_bbox(tile_mosaic))
+        st_crs(bounding_poly) <- st_crs(tile_mosaic)
         utm_proj4string <- utm_zone(bounding_poly, proj4string=TRUE)
         # Use nearest neighbor since the data is categorical
         band_name <- names(tile_mosaic)
@@ -173,12 +172,9 @@ extract_gfc <- function(aoi, data_folder, to_UTM=FALSE, stack="change",
                                      format='GTiff', options="COMPRESS=LZW", 
                                      ...)
         names(tile_mosaic) <- band_names
-        NAvalue(tile_mosaic) <- -1
-    } else {
-        tile_mosaic <- make_tile_mosaic(aoi, data_folder, stack=stack, 
-                                        dataset=dataset, ...)
-        NAvalue(tile_mosaic) <- -1
     }
+    
+    NAvalue(tile_mosaic) <- -1
 
     return(tile_mosaic)
 }

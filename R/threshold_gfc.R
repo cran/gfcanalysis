@@ -77,6 +77,7 @@
 #' @return \code{RasterBrick} with thresholded GFC product (see details above)
 threshold_gfc <- function(gfc, forest_threshold=25, ...) {
     names(gfc) <- c('treecover2000', 'lossyear', 'gain', 'datamask')
+     
     recode_gfc <- function(treecover2000, lossyear, gain, datamask) {
         forest2000 <- treecover2000 > forest_threshold
         # Note forest2000 is a binary variable
@@ -89,8 +90,10 @@ threshold_gfc <- function(gfc, forest_threshold=25, ...) {
                              ncol=5)
         return(thresholded)
     }
+
     thresholded <- overlay(gfc, fun=recode_gfc, datatype='INT1U', 
                            format='GTiff', options="COMPRESS=LZW", ...)
+
     names(thresholded) <- c('forest2000', 'lossyear', 'gain', 'lossgain', 
                             'datamask')
     return(thresholded)

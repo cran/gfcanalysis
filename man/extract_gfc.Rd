@@ -9,12 +9,12 @@ extract_gfc(
   data_folder,
   to_UTM = FALSE,
   stack = "change",
-  dataset = "GFC-2019-v1.7",
+  dataset = "GFC-2022-v1.10",
   ...
 )
 }
 \arguments{
-\item{aoi}{an Area of Interest (AOI) as a \code{SpatialPolygons*} or \code{sf} object.
+\item{aoi}{an Area of Interest (AOI) as a \code{sf} object.
 If the AOI is not in WGS 1984 (EPSG:4326), it will be reprojected to WGS84.}
 
 \item{data_folder}{folder where downloaded GFC product tiles are located 
